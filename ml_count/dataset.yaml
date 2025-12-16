@@ -1,0 +1,7 @@
+path: C:\Users\v.hariharasudhan\Desktop\ML Task\ml_count\dataset
+train: images/train
+val: images/val
+
+
+names:
+ 0: gear
