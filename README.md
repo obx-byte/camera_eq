@@ -1,0 +1,57 @@
+import cv2
+
+# Read image
+img = cv2.imread("gear.jpg")
+
+# Convert to grayscale
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# Increase contrast
+clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+enhanced = clahe.apply(gray)
+
+# Remove noise
+blur = cv2.GaussianBlur(enhanced, (5,5), 0)
+
+# Threshold
+_, thresh = cv2.threshold(blur, 0, 255,
+                           cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+cv2.imwrite("processed.jpg", thresh)
+
+
+import easyocr
+
+reader = easyocr.Reader(['en'], gpu=False)
+
+results = reader.readtext("processed.jpg")
+
+extracted_text = []
+
+for detection in results:
+    text = detection[1]
+    confidence = detection[2]
+
+    if confidence > 0.4:  # ignore weak detection
+        extracted_text.append(text)
+
+print(extracted_text)
+
+
+final_text = " ".join(extracted_text)
+
+print(final_text)
+
+
+
+import pandas as pd
+
+data = {
+    "Part_Number": [final_text]
+}
+
+df = pd.DataFrame(data)
+
+df.to_excel("component_numbers.xlsx", index=False)
+
+print("Saved to component_numbers.xlsx")
